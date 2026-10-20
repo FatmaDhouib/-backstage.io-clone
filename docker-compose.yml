@@ -1,0 +1,33 @@
+
+services:
+  backstage:
+    image: backstage:latest
+    container_name: backstage
+    ports:
+      - "7007:7007"
+    cpus: 2.0
+    mem_limit: 3g
+    memswap_limit: 6g
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    container_name: backstage-postgres
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: change-this-password
+      POSTGRES_DB: backstage
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backstage -d backstage"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
