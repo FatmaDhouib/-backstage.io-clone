@@ -1,24 +1,22 @@
-app:
-  # Should be the same as backend.baseUrl when using the `app-backend` plugin.
-  baseUrl: https://homeserver.tail97fa24.ts.net
+﻿app:
+  # Backstage frontend is served by the backend app plugin.
+  baseUrl: http://localhost:7007
 
 backend:
-  # Note that the baseUrl should be the URL that the browser and other clients
-  # should use when communicating with the backend, i.e. it needs to be
-  # reachable not just from within the backend host, but from all of your
-  # callers. When its value is "https://homeserver.tail97fa24.ts.net", it's strictly private
-  # and can't be reached by others.
-  baseUrl: https://homeserver.tail97fa24.ts.net
+  # Browser-facing backend URL.
+  baseUrl: http://localhost:7007
+
   cors:
-    origin: https://homeserver.tail97fa24.ts.net
-  # The listener can also be expressed as a single <host>:<port> string. In this case we bind to
-  # all interfaces, the most permissive setting. The right value depends on your specific deployment.
+    origin: http://localhost:7007
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+
+  # Listen on all interfaces inside the container.
   listen: ':7007'
 
   csp:
     upgradeInsecureRequests: false
 
-  # config options: https://node-postgres.com/apis/client
   database:
     client: pg
     connection:
@@ -27,12 +25,6 @@ backend:
       user: ${POSTGRES_USER}
       password: ${POSTGRES_PASSWORD}
       database: backstage
-      # https://node-postgres.com/features/ssl
-      # you can set the sslmode configuration option via the `PGSSLMODE` environment variable
-      # see https://www.postgresql.org/docs/current/libpq-ssl.html Table 33.1. SSL Mode Descriptions (e.g. require)
-      # ssl: false
-      #   ca: # if you have a CA file and want to verify it you can uncomment this section
-      #     $file: <file-path>/ca/server.crt
 
 auth:
   environment: production
@@ -45,27 +37,38 @@ auth:
           resolvers:
             - resolver: userIdMatchingUserEntityAnnotation
     guest: null
-    # guest:
-    #   dangerouslyAllowOutsideDevelopment: true
 
 catalog:
-  # Overrides the default list locations from app-config.yaml as these contain example data.
-  # See https://backstage.io/docs/features/software-catalog/#adding-components-to-the-catalog for more details
-  # on how to get entities into the catalog.
   locations:
-    # Local example data, replace this with your production config, these are intended for demo use only.
-    # File locations are relative to the backend process, typically in a deployed context, such as in a Docker container, this will be the root
     - type: file
       target: ./examples/entities.yaml
 
-    # Local example template
     - type: file
       target: ./examples/template/template.yaml
       rules:
         - allow: [Template]
 
-    # Local example organizational data
     - type: file
       target: ./examples/org.yaml
       rules:
         - allow: [User, Group]
+
+    - type: file
+      target: ./examples/templates/portfolio-nextjs/template.yaml
+      rules:
+        - allow: [Template]
+
+    - type: file
+      target: ./examples/templates/portfolio-docker-publish/template.yaml
+      rules:
+        - allow: [Template]
+
+    - type: file
+      target: ./examples/templates/portfolio-deploy/template.yaml
+      rules:
+        - allow: [Template]
+
+    - type: file
+      target: ./examples/templates/portfolio-release/template.yaml
+      rules:
+        - allow: [Template]
